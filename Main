@@ -1,0 +1,63 @@
+import cv2
+from Modules import processLowerStar as pls
+import math
+import matplotlib.pyplot as plt
+# from PIL import Image
+# import random
+
+
+# get the indices from the string
+def getPixel(value,rows,columns):
+    rows = rows-1
+    number = float(value[3:])
+    number = ((number *2*rows*columns)/.5)/rows
+    if  isinstance(number,int):
+        raise("Number cannot be integer")
+    x = math.modf(number)
+    j = int(x[1])
+    i = int(round((x[0]*rows)))
+    return i,j
+
+# color the critical points to test
+#red pixel is 2-cell critical point
+#green pixel is 1-cell critical point
+# blue pixel is 0-cell critical point
+def color_pixels(critical_cells,im,rows,columns):
+    print("hi")
+    val=''
+    for value in critical_cells:
+        count = value.count('.')
+        i =0
+        j=0
+        try:
+            if count == 1:
+                i, j = getPixel(value, rows, columns)
+                im[i][j] = [0, 0, 255]
+            elif count == 2:
+                x = pls.split_to_vertices(value)
+                for item in x:
+                    val = item
+                    i, j = getPixel(item, rows, columns)
+                    im[i][j] = [0, 255, 0]
+            else:
+                x = pls.split_to_vertices(value)
+                for item in x:
+                    val= item
+                    i, j = getPixel(item, rows, columns)
+                    im[i][j] = [255, 0, 0]
+        except Exception as e:
+            print(val)
+            print("i: {},j: {}".format(i,j))
+    imgplot = plt.imshow(im)
+    plt.title("processed_osiris_whole_with_texture")
+    plt.show()
+
+
+imr = cv2.imread("img/P1_Osiris_Bronze_Detail_ohneTextur.jpg")
+im = cv2.imread("img/P1_Osiris_Bronze_Detail_ohneTextur.jpg",cv2.IMREAD_GRAYSCALE)
+rows, columns = im.shape
+c,v = pls.process_lower_star(im)
+color_pixels(c,imr,rows,columns)
+
+
+
